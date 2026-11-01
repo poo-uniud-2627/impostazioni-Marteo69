@@ -29,6 +29,19 @@ public record Impostazioni(int puntiPerVincere, int scartoMinimo, int velocitaPa
      */
     public Impostazioni {
         // scrivete qui
+        if (!inIntervallo(puntiPerVincere, 1, 99)) {
+            throw new IllegalArgumentException("puntiPerVincere deve essere compreso tra 1 e 99: " + puntiPerVincere);
+        }
+        if (!inIntervallo(scartoMinimo, 1, 10)) {
+            throw new IllegalArgumentException("scartoMinimo deve essere compreso tra 1 e 10: " + scartoMinimo);
+        }
+        if (!inIntervallo(velocitaPalla, 1, 20)) {
+            throw new IllegalArgumentException("velocitaPalla deve essere compreso tra 1 e 20: " + velocitaPalla);
+        }
+    }
+
+    private static boolean inIntervallo(int valore, int min, int max) {
+        return min <= valore && valore <= max;
     }
 
     /**
@@ -51,7 +64,87 @@ public record Impostazioni(int puntiPerVincere, int scartoMinimo, int velocitaPa
      * Se ci sono errori in più righe, il messaggio è quello della riga più in alto.
      */
     public static Impostazioni leggi(List<String> righe) {
-        return STANDARD; // scrivete qui
+
+        int puntiPerVincere = 11;
+        int scartoMinimo = 2;
+        int velocitaPalla = 5;
+
+        boolean puntiLetti = false;
+        boolean scartoLetto = false;
+        boolean velocitaLetta = false;
+        
+        for (int i = 0; i < righe.size(); i++) {
+
+            String sc = "riga " + (i+1) + ": "; // scorciatoia per non riscrivere ogni volta la stessa cosa
+
+            String riga = righe.get(i).trim();
+
+            if (riga.isEmpty() || riga.startsWith("#")) {
+                continue;
+            }
+
+            // 1.
+            int posUguale = riga.indexOf('=');
+            if (posUguale == -1) {
+                throw new IllegalArgumentException(sc + "manca il segno '='");
+            }
+
+            String key = riga.substring(0, posUguale).trim();
+            String valueString = riga.substring(posUguale+1).trim();
+
+            // 2.
+            if (!(key.equals("puntiPerVincere") || key.equals("scartoMinimo") || key.equals("velocitaPalla"))) {
+                throw new IllegalArgumentException(sc + "chiave non riconosciuta: " + key);
+            }
+
+            // 3.
+            int valueInt;
+            try {
+                valueInt = Integer.parseInt(valueString);
+            }
+            catch(NumberFormatException e) {
+                throw new IllegalArgumentException(sc + "impossibile convertire la valuta " + valueString + " in un intero");
+            }
+
+            // 4.
+            if (key.equals("puntiPerVincere")) {
+                if (puntiLetti) {
+                    throw new IllegalArgumentException(sc + "puntiPerVincere è stato scritto più di una volta");
+                }
+                puntiPerVincere = valueInt;
+                puntiLetti = true;
+            }
+            else if (key.equals("scartoMinimo")) {
+                if (scartoLetto) {
+                    throw new IllegalArgumentException(sc + "scartoMinimo è stato scritto più di una volta");
+                }
+                scartoMinimo = valueInt;
+                scartoLetto = true;
+            }
+            else if (key.equals("velocitaPalla")) {
+                if (velocitaLetta) {
+                    throw new IllegalArgumentException(sc + "velocitaPalla è stato scritto più di una volta");
+                }
+                velocitaPalla = valueInt;
+                velocitaLetta = true;
+            }
+
+            // 5.
+            if (!inIntervallo(puntiPerVincere, 1, 99)) {
+                throw new IllegalArgumentException(sc + "puntiPerVincere deve essere compreso tra 1 e 99: " + puntiPerVincere);
+            }
+            if (!inIntervallo(scartoMinimo, 1, 10)) {
+                throw new IllegalArgumentException(sc + "scartoMinimo deve essere compreso tra 1 e 10: " + scartoMinimo);
+            }
+            if (!inIntervallo(velocitaPalla, 1, 20)) {
+                throw new IllegalArgumentException(sc + "velocitaPalla deve essere compreso tra 1 e 20: " + velocitaPalla);
+            }
+
+
+        }
+        
+        return new Impostazioni(puntiPerVincere, scartoMinimo, velocitaPalla);
+        
     }
 
     /**
